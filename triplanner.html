@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TripPlanner - Plan Your Perfect Trip</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Arial', sans-serif; line-height: 1.6; color: #333; }
+        
+        nav {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1rem 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        nav li { margin: 0 2rem; }
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: color 0.3s;
+        }
+        nav a:hover { color: #ffd700; }
+
+        .hero {
+            background: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80') no-repeat center center/cover;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+            padding: 0 2rem;
+            margin-top: 60px;
+        }
+        .hero h1 { font-size: 4rem; margin-bottom: 1rem; }
+        .hero p { font-size: 1.5rem; margin-bottom: 2rem; }
+        .cta-button {
+            background: #ff6b6b;
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(255,107,107,0.4);
+        }
+
+        /* PLANNING SECTION */
+        .planning-section {
+            padding: 5rem 2rem;
+            background: #f8f9fa;
+            text-align: center;
+            min-height: 80vh;
+        }
+        .planning-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+            color: white;
+            border: none;
+            padding: 2rem 4rem;
+            font-size: 3.5rem;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.4s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 15px 35px rgba(255,107,107,0.4);
+            margin-bottom: 3rem;
+        }
+        .planning-btn:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 50px rgba(255,107,107,0.6);
+        }
+
+        .planning-form, .transport-selection, .transport-details, .booking-success {
+            background: white;
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            display: none;
+            animation: slideIn 0.5s ease-out;
+        }
+        .planning-form.show, .transport-selection.show, .transport-details.show, .booking-success.show { display: block; }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group {
+            margin-bottom: 2rem;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 1.1rem;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        /* SIMPLE CALENDAR */
+        .date-input { position: relative; }
+        .simple-calendar {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            padding: 1rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 1000;
+            width: 280px;
+        }
+        .simple-calendar.show { display: block; }
+
+        .calendar-nav { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 1rem; 
+        }
+        .calendar-nav button { 
+            background: #667eea; 
+            color: white; 
+            border: none; 
+            width: 30px; 
+            height: 30px; 
+            border-radius: 50%; 
+            cursor: pointer; 
+            font-size: 16px; 
+        }
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            text-align: center;
+        }
+        .day-name { font-weight: bold; color: #666; padding: 8px; }
+        .day-num {
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        .day-num:hover { background: #e3f2fd; }
+        .day-num.selected { background: #667eea; color: white; }
+        .day-other { color: #ccc; }
+
+        /* TRANSPORT SELECTION BUTTONS */
+        .transport-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        .transport-btn {
+            border: none;
+            padding: 2rem;
+            border-radius: 20px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        .transport-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+        .transport-btn:hover::before { left: 100%; }
+        .transport-btn:hover { transform: translateY(-5px) scale(1.02); }
+
+        .flight-btn { 
+            background: linear-gradient(45deg, #2196F3, #21CBF3); 
+            box-shadow: 0 10px 30px rgba(33,150,243,0.4);
+        }
+        .train-btn { 
+            background: linear-gradient(45deg, #FF5722, #FF8A65); 
+            box-shadow: 0 10px 30px rgba(255,87,34,0.4);
+        }
+        .bus-btn { 
+            background: linear-gradient(45deg, #4CAF50, #8BC34A); 
+            box-shadow: 0 10px 30px rgba(76,175,80,0.4);
+        }
+
+        .transport-emoji { font-size: 4rem; display: block; margin-bottom: 1rem; }
+
+        /* TRANSPORT DETAILS */
+        .transport-options {
+            display: grid;
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        .option-card {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        .option-card:hover, .option-card.selected {
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 10px 30px rgba(102,126,234,0.2);
+            transform: translateY(-3px);
+        }
+        .option-time { font-size: 1.8rem; font-weight: bold; color: #2c3e50; }
+        .option-details { color: #666; margin: 0.5rem 0; }
+        .option-price { font-size: 1.5rem; color: #4CAF50; font-weight: bold; }
+
+        /* BOOKING SUCCESS */
+        .ticket-section {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            margin: 2rem 0;
+        }
+        .download-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: all 0.3s;
+        }
+        .download-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(76,175,80,0.4);
+        }
+
+        .generate-btn, .back-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 1.2rem 3rem;
+            font-size: 1.3rem;
+            border-radius: 25px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            transition: all 0.3s;
+            margin: 1rem 0;
+        }
+        .generate-btn:hover, .back-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(102,126,234,0.4);
+        }
+
+        @media (max-width: 768px) {
+            .planning-btn { font-size: 2.5rem; padding: 1.5rem 2rem; }
+            .hero h1 { font-size: 2.5rem; }
+            nav ul { flex-direction: column; gap: 1rem; }
+            .transport-buttons { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="#home">Home</a></li>
+            <li><a href="#planning">Planning</a></li>
+            <li><a href="#about">About</a></li>
+        </ul>
+    </nav>
+    
+    <section id="home" class="hero">
+        <h1>Plan Your Dream Trip</h1>
+        <p>Discover amazing destinations and create unforgettable memories with our smart trip planner.</p>
+        <a href="#planning" class="cta-button">Start Planning</a>
+    </section>
+    
+    <section id="planning" class="planning-section">
+        <button class="planning-btn" onclick="showPlanningForm()">PLANNING</button>
+        
+        <!-- TRIP FORM -->
+        <form id="tripForm" class="planning-form">
+            <div class="form-group">
+                <label>Number of People:</label>
+                <select id="numPeople">
+                    <option value="1">1 Person</option>
+                    <option value="2">2 People</option>
+                    <option value="3">3 People</option>
+                    <option value="4">4 People</option>
+                    <option value="5+">5+ People</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>From:</label>
+                <input type="text" id="fromPlace" placeholder="e.g., Hyderabad" required>
+            </div>
+            <div class="form-group">
+                <label>Destination:</label>
+                <input type="text" id="toPlace" placeholder="e.g., Goa" required>
+            </div>
+            <div class="form-group date-input">
+                <label>Trip Start Date:</label>
+                <input type="text" id="dateDisplay" readonly placeholder="Click to pick date">
+                <div id="simpleCalendar" class="simple-calendar"></div>
+            </div>
+            <button type="submit" class="generate-btn">Generate My Trip Plan</button>
+        </form>
+
+        <!-- TRANSPORT SELECTION -->
+        <div id="transportSelection" class="transport-selection">
+            <h2 style="margin-bottom: 2rem; color: #2c3e50;">Choose Your Travel Mode</h2>
+            <p style="margin-bottom: 2rem; color: #666;">Select how you want to travel from <span id="tripSummary"></span></p>
+            
+            <div class="transport-buttons">
+                <button class="transport-btn flight-btn" onclick="showTransportDetails('flight')">
+                    <span class="transport-emoji">✈️</span>
+                    Flight
+                </button>
+                <button class="transport-btn train-btn" onclick="showTransportDetails('train')">
+                    <span class="transport-emoji">🚂</span>
+                    Train
+                </button>
+                <button class="transport-btn bus-btn" onclick="showTransportDetails('bus')">
+                    <span class="transport-emoji">🚌</span>
+                    Bus
+                </button>
+            </div>
+            <button class="back-btn" onclick="showPlanningForm()">Back to Planning</button>
+        </div>
+
+        <!-- TRANSPORT DETAILS -->
+        <div id="transportDetails" class="transport-details">
+            <h2 id="transportTitle" style="margin-bottom: 2rem; color: #2c3e50;"></h2>
+            <div id="transportOptions" class="transport-options"></div>
+            <button class="back-btn" onclick="showTransportSelection()">← Back to Transport Options</button>
+        </div>
+
+        <!-- BOOKING SUCCESS -->
+        <div id="bookingSuccess" class="booking-success">
+            <h2 style="color: #4CAF50; margin-bottom: 1rem;">🎉 Tickets Booked Successfully!</h2>
+            <div class="ticket-section">
+                <h3>Your <span id="selectedTransportName"></span> Tickets</h3>
+                <p id="ticketDetails"></p>
+                <p><strong>Download your tickets below:</strong></p>
+                <button class="download-btn" onclick="downloadTicket()">📥 Download PDF Ticket</button>
+            </div>
+            <button class="generate-btn" onclick="showPlanningForm()">Plan New Trip</button>
+        </div>
+    </section>
+
+    <script>
+        let simpleCurrentDate = new Date();
+        let selectedSimpleDate = null;
+        let currentTransport = '';
+        let selectedOption = null;
+        let tripData = {};
+
+        // SIMPLE CALENDAR FUNCTIONS
+        function toggleSimpleCalendar() {
+            const cal = document.getElementById('simpleCalendar');
+            cal.classList.toggle('show');
+            if (!cal.innerHTML) generateSimpleCalendar();
+        }
+
+        function generateSimpleCalendar() {
+            const cal = document.getElementById('simpleCalendar');
+            const year = simpleCurrentDate.getFullYear();
+            const month = simpleCurrentDate.getMonth();
+            
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                               'July', 'August', 'September', 'October', 'November', 'December'];
+            
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const firstDay = new Date(year, month, 1).getDay();
+            
+            let html = `
+                <div class="calendar-nav">
+                    <button onclick="simplePrevMonth()">‹</button>
+                    <span>${monthNames[month]} ${year}</span>
+                    <button onclick="simpleNextMonth()">›</button>
+                </div>
+                <div class="calendar-days">
+                    <div class="day-name">S</div><div class="day-name">M</div><div class="day-name">T</div>
+                    <div class="day-name">W</div><div class="day-name">T</div><div class="day-name">F</div><div class="day-name">S</div>
+            `;
+            
+            for(let i = 0; i < firstDay; i++) {
+                html += '<div class="day-num day-other"></div>';
+            }
+            
+            for(let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+                const isSelected = selectedSimpleDate === dateStr;
+                html += `<div class="day-num ${isSelected ? 'selected' : ''}" onclick="selectSimpleDate('${dateStr}', '${day}')">${day}</div>`;
+            }
+            
+            html += '</div>';
+            cal.innerHTML = html;
+        }
+
+        function selectSimpleDate(dateStr, dayNum) {
+            selectedSimpleDate = dateStr;
+            document.getElementById('dateDisplay').value = dayNum + '/' + (simpleCurrentDate.getMonth() + 1) + '/' + simpleCurrentDate.getFullYear();
+            document.getElementById('simpleCalendar').classList.remove('show');
+        }
+
+        function simplePrevMonth() {
+            simpleCurrentDate.setMonth(simpleCurrentDate.getMonth() - 1);
+            generateSimpleCalendar();
+        }
+
+        function simpleNextMonth() {
+            simpleCurrentDate.setMonth(simpleCurrentDate.getMonth() + 1);
+            generateSimpleCalendar();
+        }
+
+        // Navigation Functions
+        function showPlanningForm() {
+            hideAllSections();
+            document.getElementById('tripForm').classList.add('show');
+        }
+
+        function showTransportSelection() {
+            hideAllSections();
+            document.getElementById('transportSelection').classList.add('show');
+            document.getElementById('tripSummary').textContent = 
+                `${tripData.numPeople} from ${tripData.fromPlace} to ${tripData.toPlace}`;
+        }
+
+        function showTransportDetails(transport) {
+            currentTransport = transport;
+            hideAllSections();
+            document.getElementById('transportDetails').classList.add('show');
+            
+            const titles = {
+                flight: '✈️ Available Flights',
+                train: '🚂 Available Trains',
+                bus: '🚌 Available Buses'
+            };
+            document.getElementById('transportTitle').innerHTML = titles[transport];
+            generateTransportOptions(transport);
+        }
+
+        function generateTransportOptions(transport) {
+            const optionsContainer = document.getElementById('transportOptions');
+            const options = {
+                flight: [
+                    { time: '08:30 AM', details: 'IndiGo 6E-234', duration: '1h 45m', price: '₹4500', id: 'f1' },
+                    { time: '11:15 AM', details: 'Air India AI-567', duration: '2h 10m', price: '₹5200', id: 'f2' },
+                    { time: '03:45 PM', details: 'SpiceJet SG-890', duration: '1h 50m', price: '₹3800', id: 'f3' }
+                ],
+                train: [
+                    { time: '07:00 AM', details: 'Rajdhani Exp 12951', duration: '12h 30m', price: '₹1800', id: 't1' },
+                    { time: '02:30 PM', details: 'Konark Exp 11019', duration: '14h 15m', price: '₹1200', id: 't2' },
+                    { time: '09:20 PM', details: 'Sampark Kranti 12782', duration: '13h 40m', price: '₹2200', id: 't3' }
+                ],
+                bus: [
+                    { time: '06:00 AM', details: 'Volvo AC Sleeper', duration: '16h 45m', price: '₹1500', id: 'b1' },
+                    { time: '01:15 PM', details: 'Semi Sleeper AC', duration: '17h 30m', price: '₹1100', id: 'b2' },
+                    { time: '08:00 PM', details: 'Mercedes Benz AC', duration: '15h 20m', price: '₹2000', id: 'b3' }
+                ]
+            };
+            
+            optionsContainer.innerHTML = options[transport].map(option => `
+                <div class="option-card" onclick="selectTransportOption('${option.id}', '${option.time}', '${option.details}', '${option.price}')">
+                    <div class="option-time">${option.time}</div>
+                    <div class="option-details">${option.details} • ${option.duration}</div>
+                    <div class="option-price">${option.price}</div>
+                </div>
+            `).join('');
+        }
+
+        function selectTransportOption(id, time, details, price) {
+            selectedOption = { id, time, details, price };
+            document.querySelectorAll('.option-card').forEach(card => 
+                card.classList.remove('selected'));
+            event.currentTarget.classList.add('selected');
+        }
+
+        function showBookingSuccess() {
+            hideAllSections();
+            document.getElementById('bookingSuccess').classList.add('show');
+            document.getElementById('selectedTransportName').textContent = currentTransport.toUpperCase();
+            document.getElementById('ticketDetails').innerHTML = `
+                <strong>${tripData.numPeople}</strong> tickets<br>
+                ${selectedOption.details}<br>
+                Departure: <strong>${selectedOption.time}</strong><br>
+                ${tripData.fromPlace} → ${tripData.toPlace}<br>
+                Date: ${tripData.date}
+            `;
+        }
+
+        function hideAllSections() {
+            document.querySelectorAll('.planning-form, .transport-selection, .transport-details, .booking-success').forEach(section => {
+                section.classList.remove('show');
+            });
+        }
+
+        // Event Listeners
+        document.getElementById('tripForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            tripData = {
+                numPeople: document.getElementById('numPeople').value,
+                fromPlace: document.getElementById('fromPlace').value,
+                toPlace: document.getElementById('toPlace').value,
+                date: document.getElementById('dateDisplay').value
+            };
+            showTransportSelection();
+        });
+
+        document.getElementById('dateDisplay').onclick = toggleSimpleCalendar;
+
+        document.addEventListener('click', function(e) {
+            const dateInput = document.querySelector('.date-input');
+            const cal = document.getElementById('simpleCalendar');
+            if (!dateInput.contains(e.target)) {
+                cal.classList.remove('show');
+            }
+        });
+
+        // Add booking button to transport details
+        document.getElementById('transportDetails').addEventListener('click', function(e) {
+            if (e.target.classList.contains('option-card') && selectedOption) {
+                showBookingSuccess();
+            }
+        });
+
+        function downloadTicket() {
+            const ticketContent = `
+TRIP PLANNER - TICKET
+========================
+Transport: ${currentTransport.toUpperCase()}
+${selectedOption.details}
+Time: ${selectedOption.time}
+Route: ${tripData.fromPlace} → ${tripData.toPlace}
+Date: ${tripData.date}
+People: ${tripData.numPeople}
+Price: ${selectedOption.price}
+
+Thank you for choosing TripPlanner!
+            `;
+            
+            const blob = new Blob([ticketContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `ticket-${currentTransport}-${Date.now()}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
