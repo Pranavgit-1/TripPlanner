@@ -17,11 +17,10 @@ How to Use
 5. **Download your ticket!**
 
 Live Demo
-**[Click Here](https://YOUR_USERNAME.github.io/TripPlanner/)**
+**[Click Here](https://Pranavgit-1.github.io/TripPlanner/)**
 
 Project Status
 Complete | Ready for Deployment
 
 ---
 **Made with for B.Tech Final Year Project**
-
